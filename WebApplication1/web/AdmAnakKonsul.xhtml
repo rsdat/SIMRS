@@ -1,0 +1,214 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+    <link href="./resources/UGD-css/pasien-ugd.css" rel="stylesheet" type="text/css" />
+     <ui:composition template="./Template-Pemeriksaan-IGD-Anak.xhtml">
+
+            <ui:define name="content">
+                <p:layoutUnit position="center" header="Konsultasi Medis" gutter="0">
+                  <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>       
+                     <p:dialog widgetVar="statusDialog" draggable="false" header="50" closable="false" resizable="false" showHeader="false">
+                    <p:graphicImage height="100" value="image/progressbar.gif"/>
+                </p:dialog>  
+               <h:form id="form">
+                   <p:growl id="growl" showDetail="true" life="5000"/>
+                    
+                   <p:panel style="border: none">
+                       <p:panel>
+                           <h:panelGrid columns="3">
+                               <h:outputText value="Unit"/>
+                               <h:outputText value=":"/>
+                               <p:selectOneMenu value="#{tabelPesanKonsulController.unitPemesan}">
+                                   <f:selectItems var="unit" value="#{tabelPesanKonsulController.unitpenerimans}" itemLabel="#{unit.statusketerangan}" itemValue="#{unit.statusketerangan}"/>
+                               <p:ajax update=":form:konsul" listener="#{tabelPesanKonsulController.PILIH_RAWATINAP()}"/>
+                               </p:selectOneMenu>
+                           </h:panelGrid>
+                       </p:panel>
+                       <p:panel>
+                            <h:panelGrid columns="4">
+                            <p:commandButton style="border: none; border-radius: 5px; width: 200px; height: 30px; background: #33ff33; color: black;" value="Tambah"  onclick="PF('dialogKonsultasi').show();" />
+                            <p:commandButton style="border: none; border-radius: 5px; width: 200px; height: 30px; background: #33ff33; color: black;" value="Batal" update=":form:konsul :form:growl :form4:TRS" actionListener="#{tabelPesanKonsulController.DELETEKONSUL()}" />
+                            <p:commandButton value="Perbarui" actionListener="#{tabelPesanKonsulController.TAMPILTARIFPASIEN()}" update=":form4:TRS :form:growl" style="border: none; border-radius: 6px; width: 150px; background: #33ff33; height: 30px; color: #000000; "/>
+                            <p:panelGrid columns="4">
+                            <h:outputLabel value="Proses"/>
+                            <p:panel style="background: #ffff00"/>
+                            <h:outputLabel value="Batal"/>
+                            <p:panel style="background: royalblue"/>
+                            </p:panelGrid>
+                            </h:panelGrid>
+                         </p:panel>   
+                         <p:dataTable id="konsul"  var="carx" value="#{tabelPesanKonsulController.konsultasiLIST}" rowKey="#{carx.noKonsultasiMedis}"  
+                                      rowIndexVar="noidx" widgetVar="carkonsul" paginator="true" rows="10"    rowStyleClass="#{carx.status eq 'PesanKonsul'? 'PesanLab':
+                                                       carx.status eq 'BatalKonsul'? 'batalPesanLab':null }"
+                                                       selection="#{tabelPesanKonsulController.tempPesanKonsultasi}">  
+                                 <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Cari Data:" />
+                                        <p:inputText id="globalFilter" onkeyup="PF('carkonsul').filter()" style="width: 60%;"/>
+                                    </p:outputPanel>
+                                </f:facet>
+                             <p:column headerText="No" width="15" style="text-align: center;">
+                                 #{noidx+1}
+                             </p:column> 
+                               <p:column selectionMode="multiple" styleClass="lab" style="width:4%;text-align:center"/> 
+                               
+                               <p:column style="text-align: center;" headerText="Tanggal | JAM" styleClass="lab" >  
+                                   <h:outputText value="#{carx.tanggalKonsultasiMedis}">
+                                       <f:convertDateTime pattern="dd-MM-yyyy HH:mm:ss" locale="id" timeZone="display:none"/>
+                                   </h:outputText>  
+                                    </p:column>  
+                               <p:column style="text-align: center;" headerText="Dokter" styleClass="lab" filterBy="#{carx.namaDokter}" filterMatchMode="contains" filterStyle="display:none">  
+                                        <h:outputText value="#{carx.namaDokter}"/>  
+                                    </p:column>  
+                                    
+                                    <p:column style="text-align: center;" headerText="Keterangan" styleClass="lab" filterBy="#{carx.keteranganKonsultasi}" filterMatchMode="contains" filterStyle="display:none">  
+                                        <h:outputText value="#{carx.keteranganKonsultasi}"/>  
+                                    </p:column>  
+
+                                    <p:column style="text-align: center;" headerText="Biaya" styleClass="lab" filterBy="#{carx.tarifKonsultasi}" filterMatchMode="contains" filterStyle="display:none">  
+                                        <h:outputText value="#{carx.tarifKonsultasi}">
+                                            <f:convertNumber type="currency" currencySymbol="Rp "/>
+                                        </h:outputText>  
+                                    </p:column>  
+                                
+                                <p:columnGroup type="footer">
+                                    <p:row>
+                                         <p:column/>
+                                         <p:column/>
+                                        <p:column/>
+                                        <p:column/>
+                                        <p:column footerText="Total :" style="text-align:right"/>
+                                        <p:column footerText="Rp. #{tabelPesanKonsulController.totalbiayadokter}"/>
+                                       </p:row>
+                                </p:columnGroup>   
+                            </p:dataTable>
+                                          
+                </p:panel>
+                      
+                    <p:dialog id="dialogKonsultasi" widgetVar="dialogKonsultasi" header="Master Konsultasi" width="700">
+                       <p:dataTable id="masterKonsultasi" var="masterKonsultasi" value="#{tabelPesanKonsulController.masterKonsultasilist}" rowKey="#{masterKonsultasi.idKonsultasi}"  
+                                    rowIndexVar="noidx1"  widgetVar="FKONS" resizableColumns="false"  paginator="true" rows="10" selection="#{tabelPesanKonsulController.tempMasterKonsultasi}">
+                               <p:column selectionMode="multiple"  style="width: 5%;text-align:center"/>   
+                              <f:facet name="header">
+                                <p:outputPanel>
+                                <h:outputText value="Cari Data:" />
+                                     <p:inputText id="globalFilter" onkeyup="PF('FKONS').filter()" style="width: 60%;"/>
+                                </p:outputPanel>
+                                </f:facet>
+                              
+                              <p:ajax event="rowSelect" listener="#{tabelPesanKonsulController.ONROWSELECTKONSUL(event)}"/>
+                               <p:column headerText="No" width="15" style="text-align: center;">
+                                 #{noidx1+1}
+                             </p:column> 
+                              <p:column style="text-align: center;" filterBy="#{masterKonsultasi.tabelPersonnel.namaPersonnel}" headerText="Nama Dokter" filterMatchMode="contains" filterStyle="display:none">
+                                  <h:outputText value="#{masterKonsultasi.tabelPersonnel.namaPersonnel}" />
+                                </p:column>
+                            
+                              <p:column style="text-align: center;" headerText="Keterangan" filterBy="#{masterKonsultasi.keteranganKonsultasi}" filterMatchMode="contains" filterStyle="display:none">  
+                                <h:outputText value="#{masterKonsultasi.keteranganKonsultasi}" />  
+                          </p:column>  
+                            
+                              <p:column style="text-align: center;" headerText="Tarif" filterBy="#{masterKonsultasi.tarifKonsultasi}" filterMatchMode="contains" filterStyle="display:none">  
+                                <h:outputText value="#{masterKonsultasi.tarifKonsultasi}" >
+                                    <f:convertNumber type="currency" currencySymbol="Rp "/>
+                                </h:outputText>  
+                          </p:column>  
+                         </p:dataTable>
+                                <p:panel style="border: none">
+                                    <div align="center">
+                                    <h:panelGrid columns="2">
+                                         <p:commandButton value="Tambah" update=":form:konsul form:growl :form4:TRS" style="border-radius: 5px; width: 250px; border: 0px; background: #33ff33;" actionListener="#{tabelPesanKonsulController.SIMPANKONSULTASI()}" onclick="PF('dialogKonsultasi').hide();"/>
+                                         <p:commandButton value="Tampil Semua" update=":form:masterKonsultasi" style="border-radius: 5px; width: 250px; border: 0px; background: #33ff33;" actionListener="#{tabelPesanKonsulController.TAMPILSEMUADOKTER()}"/>
+                                    </h:panelGrid></div>
+                                </p:panel>
+                      </p:dialog>
+                </h:form>
+                </p:layoutUnit>
+                 
+               
+            </ui:define>
+            <ui:define name="left">
+                <p:layoutUnit position="east" size="210" header="Data Pasien" resizable="true" closable="true" collapsible="true" effect="drop">
+                      <h:form id="form4">
+                       <h:panelGrid columns="1" style="width: 100%;">
+                                <p:panel style="border: 0px;">
+
+                          <h:panelGrid id="pasien" columns="3" style="margin-left: -13px; font-size: 10px; font-weight: bold">
+                                 <h:outputText value="No Transaksi"/>
+                                 <h:outputText value=":"/>
+                                 <h:outputText value="#{tabelPesanKonsulController.tabelDaftar.noDaftar}"/>
+
+                                 <h:outputText value="No RM"/>
+                                 <h:outputText value=":"/>
+                                 <h:outputText value="#{tabelPesanKonsulController.tabelDaftar.noRmPasien}"/>
+
+                                  <h:outputText value="Nama"/>
+                                  <h:outputText value=":"/>
+                                  <h:outputText value="#{tabelPesanKonsulController.tabelDaftar.namaPasien}"/>
+
+                                  <h:outputText value="Tgl Lahir"/>
+                                  <h:outputText value=":"/>
+                                  <h:outputText value="#{tabelPesanKonsulController.tabelDaftar.tgllahir}">
+                                      <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                  </h:outputText>
+
+                                  <h:outputText value="Kelamin"/>
+                                  <h:outputText value=":"/>
+                                  <h:outputText value="#{tabelPesanKonsulController.tabelDaftar.jenisKelamin}"/>
+
+                                  <h:outputText value="Alamat"/>
+                                  <h:outputText value=":"/>
+                                  <h:outputText value="#{tabelPesanKonsulController.tabelDaftar.alamat}"/>
+                              </h:panelGrid> 
+                       </p:panel>
+
+                           <p:menu styleClass="administrasi" style="margin-left: -5px; background: transparent; width: 100%; border: 0px">
+                               <p:submenu styleClass="administrasi" label="Administrasi" >
+                               </p:submenu>
+                           </p:menu>
+                           </h:panelGrid>
+
+                         <p:panel id="TRS" style="width: 205px; margin-left: -10px; padding-bottom: -10px; padding-top: -10px; font-size: 10px; font-weight: bold ">
+
+                              <h:dataTable style="margin-left: -4px; border: 30px;"   var="tarif" value="#{tabelPesanKonsulController.transaksislist}">
+                                  <p:column>
+                                      <h:outputText value="#{tarif.namaTarif}"/>
+                                  </p:column>
+                                  <p:column>
+                                      <h:outputText value="#{tarif.jumlahbiayadis_1}">
+                                       <f:convertNumber type="currency" currencySymbol="Rp."/>
+                                   </h:outputText>
+                                  </p:column>
+                              </h:dataTable>
+
+                              <p:separator/>
+
+                              <p:column>
+                                   <h:outputText value="Administrasi" style="font-size: 10px; font-weight: bold"/>  &nbsp; 
+
+                                  <h:outputText id="total" value="#{tabelPesanKonsulController.admnin}">
+                               <f:convertNumber type="currency" currencySymbol="Rp."/>
+                           </h:outputText>
+                          </p:column><p/>
+                              <p:column>
+                               <h:outputText value="Total Biaya" style="font-size: 10px; font-weight: bold"/>  &nbsp; 
+
+                                  <h:outputText id="total2" value="#{tabelPesanKonsulController.totaltransaksi}">
+                               <f:convertNumber type="currency" currencySymbol="Rp."/>
+                           </h:outputText>
+                          </p:column>
+                           </p:panel>
+                          
+                   </h:form>
+                </p:layoutUnit>
+             </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
